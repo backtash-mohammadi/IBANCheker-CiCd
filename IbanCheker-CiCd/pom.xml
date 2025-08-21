@@ -2,19 +2,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>pet_passport</groupId>
-    <artifactId>IbanCheker-CiCd</artifactId>
+    <artifactId>IbanChecker-CiCd</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>IBAN Checker CI/CD</name>
+    <description>IBAN validation application with CI/CD pipeline</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
+        <maven.surefire.version>3.2.5</maven.surefire.version>
         <jacoco.version>0.8.12</jacoco.version>
         <spotbugs.version>4.8.6.2</spotbugs.version>
+        <!-- Initialize JaCoCo argLine to empty string to avoid resolution errors -->
+        <jacocoArgLine></jacocoArgLine>
     </properties>
 
     <dependencies>
@@ -28,61 +36,79 @@
 
     <build>
         <plugins>
-            <!-- Run JUnit 5 tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.12.1</version>
                 <configuration>
-                    <useModulePath>false</useModulePath>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <argLine>${jacocoArgLine}</argLine>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo code coverage -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                    <!-- Use @{argLine} for late replacement of JaCoCo agent -->
+                    <argLine>@{argLine}</argLine>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>${jacoco.version}</version>
                 <executions>
-                <execution>
-                    <goals>
-                        <goal>prepare-agent</goal>
-                    </goals>
-                    <configuration>
-                        <!-- Expose agent options to Surefire via this property -->
-                        <propertyName>jacocoArgLine</propertyName>
-                    </configuration>
-                </execution>
-                <execution>
-                    <id>report</id>
-                    <phase>verify</phase>
-                    <goals>
-                        <goal>report</goal>
-                    </goals>
-                </execution>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
 
-            <!-- SpotBugs static analysis -->
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>${spotbugs.version}</version>
                 <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
+                    <effort>Default</effort>
+                    <threshold>Medium</threshold>
                     <xmlOutput>true</xmlOutput>
-                    <failOnError>false</failOnError> <!-- set to true to fail build on findings -->
+                    <htmlOutput>true</htmlOutput>
+                    <failOnError>false</failOnError>
+                    <fork>true</fork>
+                    <maxHeap>512</maxHeap>
+                    <timeout>60000</timeout>
+                    <skip>false</skip>
                 </configuration>
                 <executions>
                     <execution>
                         <phase>verify</phase>
-                        <goals><goal>spotbugs</goal></goals>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs</artifactId>
+                        <version>4.8.6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
+
 </project>
