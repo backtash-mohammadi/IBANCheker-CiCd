@@ -12,14 +12,16 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <spotbugs.version>4.8.6.2</spotbugs.version>
     </properties>
 
     <dependencies>
-        <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.10.2</version>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -33,7 +35,6 @@
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
-                    <!-- JaCoCo javaagent gets injected here -->
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${jacocoArgLine}</argLine>
                 </configuration>
@@ -45,43 +46,41 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
                 <executions>
+                <execution>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                    <configuration>
+                        <!-- Expose agent options to Surefire via this property -->
+                        <propertyName>jacocoArgLine</propertyName>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>report</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                </execution>
+                </executions>
+            </plugin>
+
+            <!-- SpotBugs static analysis -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.version}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <xmlOutput>true</xmlOutput>
+                    <failOnError>false</failOnError> <!-- set to true to fail build on findings -->
+                </configuration>
+                <executions>
                     <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Expose agent options to Surefire via this property -->
-                            <propertyName>jacocoArgLine</propertyName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>report</id>
                         <phase>verify</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
+                        <goals><goal>spotbugs</goal></goals>
                     </execution>
-                    <!-- Optional: enforce minimum coverage (uncomment to activate)
-                    <execution>
-                      <id>check</id>
-                      <phase>verify</phase>
-                      <goals><goal>check</goal></goals>
-                      <configuration>
-                        <rules>
-                          <rule>
-                            <element>CLASS</element>
-                            <limits>
-                              <limit>
-                                <counter>INSTRUCTION</counter>
-                                <value>COVERED RATIO</value>
-                                <minimum>0.80</minimum>
-                              </limit>
-                            </limits>
-                          </rule>
-                        </rules>
-                      </configuration>
-                    </execution>
-                    -->
                 </executions>
             </plugin>
         </plugins>

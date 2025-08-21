@@ -1,0 +1,43 @@
+# macOS junk
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon?
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# (Optional) VS Code
+.vscode/
+
+# Maven / Java build outputs
+target/
+*.class
+
+# Packaged artifacts (kept out of VCS; CI will publish them)
+*.jar
+*.war
+*.ear
+# Keep Maven wrapper JAR (should be committed)
+!.mvn/wrapper/maven-wrapper.jar
+
+# Logs & JVM crash dumps
+*.log
+hs_err_pid*
+replay_pid*
+
+# Eclipse leftovers (if ever imported there)
+.project
+.classpath
+.settings/
+
+# Misc editor/merge leftovers
+*.swp
+*~
+*.orig
